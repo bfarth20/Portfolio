@@ -1,9 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useState, useRef } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  useScroll,
+  useInView,
+  useMotionValueEvent,
+} from "framer-motion";
 import { DaylightBackground } from "@/components/DaylightBackground";
 import { StarryNightBackground } from "@/components/StarryNightBackground";
+import { FilmReel } from "@/components/FilmReel";
+import { PortfolioSection } from "@/components/PortfolioSection";
+import { EducationSection } from "@/components/EducationSection";
+import { SkillsSection } from "@/components/SkillsSection";
+import { ReachOutModal } from "@/components/ReachOutModal";
+import { ResumeCta } from "@/components/ResumeCta";
 
 type Mode = "light" | "dark";
 
@@ -19,6 +32,19 @@ export default function Home() {
   const [showDetected, setShowDetected] = useState(false);
   const [bgVisible, setBgVisible] = useState(false);
   const [bioVisible, setBioVisible] = useState(false);
+  const [heroDismissed, setHeroDismissed] = useState(false);
+  const { scrollY } = useScroll();
+
+  // Hide the hero as soon as the user starts scrolling a few pixels
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setHeroDismissed(latest > 50); // tweak threshold to taste
+  });
+
+  const portfolioTriggerRef = useRef<HTMLDivElement>(null);
+  const portfolioReady = useInView(portfolioTriggerRef, {
+    margin: "0px 0px -25% 0px", // reveal a bit before it fully enters
+    once: true, // only trigger once
+  });
 
   // detect prefers-color-scheme
   useEffect(() => {
@@ -113,97 +139,185 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/30 pointer-events-none" />
       )}
 
-      {/* Foreground copy + float-to-top hero */}
-      <main className="relative z-10 min-h-screen px-6">
-        {/* This spacer keeps the hero from overlapping the top content after it floats */}
-        <div className="h-[10vh] sm:h-[12vh] md:h-[14vh]" />
-
-        <motion.div
-          // The hero block starts centered, then floats up when bg is visible
+      {/* Foreground layers */}
+      {/* Foreground layers */}
+      <main className="relative z-10 px-6">
+        {/* HERO SECTION: in-flow; animates height & fades on scroll */}
+        <motion.section
+          id="hero"
           initial={false}
           animate={
-            bgVisible
-              ? reduceMotion
-                ? { y: 0 }
-                : { y: "-35vh", scale: 0.96 }
-              : { y: 0, scale: 1 }
+            heroDismissed
+              ? { opacity: 0, height: 0, marginTop: 0 }
+              : bgVisible
+              ? { opacity: 1, height: "28vh", marginTop: 0 }
+              : { opacity: 1, height: "100vh", marginTop: 0 }
           }
           transition={
             reduceMotion
               ? {}
               : { type: "spring", stiffness: 120, damping: 20, mass: 0.8 }
           }
-          className="flex flex-col items-center text-center"
-          style={{ willChange: "transform" }}
+          className="w-full overflow-hidden"
+          style={{ willChange: "height, opacity, transform" }}
         >
-          {/* line 1: welcome (always mounted, no layout shift) */}
-          <motion.p
-            initial={false}
-            animate={showWelcome ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
-            transition={reduceMotion ? {} : { duration: 0.6, ease: "easeOut" }}
-            className="text-lg sm:text-xl md:text-2xl text-white/80"
-            aria-hidden={!showWelcome}
+          <div
+            className={`h-full flex ${
+              bgVisible ? "items-start pt-6 sm:pt-8" : "items-center"
+            } justify-center text-center`}
           >
-            welcome to the profile of
-          </motion.p>
+            <div className="flex flex-col items-center">
+              {/* line 1 */}
+              <motion.p
+                initial={false}
+                animate={
+                  showWelcome ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }
+                }
+                transition={
+                  reduceMotion ? {} : { duration: 0.6, ease: "easeOut" }
+                }
+                className="text-lg sm:text-xl md:text-2xl text-white/80"
+                aria-hidden={!showWelcome}
+              >
+                welcome to the portfolio of
+              </motion.p>
 
-          <div className="h-3" />
+              <div className="h-3" />
 
-          {/* line 2: name */}
-          <motion.h1
-            initial={false}
-            animate={showName ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-            transition={reduceMotion ? {} : { duration: 0.6, ease: "easeOut" }}
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight"
-            aria-hidden={!showName}
-            style={{ willChange: "opacity, transform" }}
-          >
-            <span className="text-[#d95c23]">Benjamin Farthing</span>
-          </motion.h1>
+              {/* line 2 */}
+              <motion.h1
+                initial={false}
+                animate={
+                  showName ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }
+                }
+                transition={
+                  reduceMotion ? {} : { duration: 0.6, ease: "easeOut" }
+                }
+                className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight"
+                aria-hidden={!showName}
+                style={{ willChange: "opacity, transform" }}
+              >
+                <span className="text-[#d95c23]">Benjamin Farthing</span>
+              </motion.h1>
 
-          <div className="h-4" />
+              <div className="h-4" />
 
-          {/* line 3: detected (fades out before background) */}
-          <motion.p
-            initial={false}
-            animate={
-              showDetected ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 }
-            }
-            transition={
-              reduceMotion ? {} : { duration: 0.4, ease: "easeInOut" }
-            }
-            className="text-base sm:text-lg md:text-xl bg-white/10 px-3 py-1.5 rounded"
-            aria-hidden={!showDetected}
-            style={{ willChange: "opacity, transform" }}
-          >
-            Screen detected — <strong>{mode}</strong>
-          </motion.p>
-        </motion.div>
+              {/* line 3 */}
+              <motion.p
+                initial={false}
+                animate={
+                  showDetected ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 }
+                }
+                transition={
+                  reduceMotion ? {} : { duration: 0.4, ease: "easeInOut" }
+                }
+                className="text-base sm:text-lg md:text-xl bg-white/10 px-3 py-1.5 rounded"
+                aria-hidden={!showDetected}
+                style={{ willChange: "opacity, transform" }}
+              >
+                Screen detected — <strong>{mode}</strong>
+              </motion.p>
+            </div>
+          </div>
+        </motion.section>
 
-        {/* Reveal the Bio section underneath once bg is visible */}
+        {/* BIO SECTION */}
         <AnimatePresence>
           {bioVisible && (
             <motion.section
               key="bio"
-              initial={reduceMotion ? {} : { opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={
-                reduceMotion ? {} : { duration: 0.5, ease: "easeOut" }
+              initial="hidden"
+              animate="show"
+              exit="hidden"
+              variants={
+                reduceMotion
+                  ? { hidden: { opacity: 0 }, show: { opacity: 1 } }
+                  : {
+                      hidden: { opacity: 0 },
+                      show: {
+                        opacity: 1,
+                        transition: {
+                          duration: 0.5,
+                          ease: "easeOut",
+                          staggerChildren: 0.12,
+                        },
+                      },
+                    }
               }
-              className="mx-auto max-w-3xl mt-[42vh] sm:mt-[44vh] md:mt-[46vh] text-left"
+              className="mx-auto max-w-6xl"
             >
-              <h2 className="text-2xl sm:text-3xl font-bold mb-4">Bio</h2>
-              <p className="text-white/90 leading-7">
-                I’m a backend-leaning full-stack developer in Atlanta with a
-                prior career in film sound. I build production-ready apps like
-                PrepMyWeek (meal planning), Appalachian Trail Weather (iOS), and
-                sensor-driven tools in Swift/React Native. I care about
-                performance, accessibility, and clean, maintainable code.
-              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6">Bio</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
+                {/* Text column */}
+                <motion.div
+                  variants={
+                    reduceMotion
+                      ? { show: { opacity: 1 } }
+                      : {
+                          hidden: { opacity: 0, y: 12 },
+                          show: {
+                            opacity: 1,
+                            y: 0,
+                            transition: { duration: 0.45 },
+                          },
+                        }
+                  }
+                  className="text-white/90 leading-7"
+                >
+                  <p>
+                    For 15 years I worked in the film industry, bringing
+                    creativity and collaboration to every project. Now I’m
+                    channeling that experience into software—crafting clean,
+                    thoughtful code and building tools that solve real problems.
+                  </p>
+                  <p className="mt-4">
+                    I studied sound recording at Savannah College of Art and
+                    Design (Magna Cum Laude), then moved to Atlanta where I
+                    built a career on union sets. As the industry landscape
+                    shifted—longer hours, lower pay, fewer opportunities—I chose
+                    a new chapter that offers safer conditions, stability, and
+                    fresh technical challenges.
+                  </p>
+                  <p className="mt-4">
+                    I took the leap into a full-stack bootcamp, spent three
+                    intense months coding 10 hours a day, and finished at the
+                    top of my class. I shipped <em>PrepMyWeek</em>, a fully
+                    functional meal-planning app, now live and growing— proof
+                    that I can deliver thoughtful, scalable software end-to-end.
+                  </p>
+                </motion.div>
+
+                {/* Video column */}
+                <FilmReel
+                  src="/media/FilmReel.mp4"
+                  className="w-full"
+                  caption="Highlights from 15 years on set"
+                />
+              </div>
             </motion.section>
           )}
         </AnimatePresence>
+
+        <div
+          ref={portfolioTriggerRef}
+          className="h-[28vh] sm:h-[32vh] md:h-[36vh]"
+        />
+
+        {/* PORTFOLIO SECTION */}
+        <PortfolioSection />
+        <SkillsSection />
+        <EducationSection />
+        <ResumeCta
+          resumePath="/resume/Benjamin-Farthing-Resume.pdf"
+          email="benjamin.farthing@gmail.com"
+          linkedin="www.linkedin.com/in/benjamin-farthing-397a3064"
+        />
+        <ReachOutModal
+          delayMs={40000}
+          email="benjamin@yourdomain.com"
+          suppressDays={0}
+        />
       </main>
     </div>
   );
