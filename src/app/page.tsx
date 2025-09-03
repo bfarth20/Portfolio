@@ -1,103 +1,210 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { DaylightBackground } from "@/components/DaylightBackground";
+import { StarryNightBackground } from "@/components/StarryNightBackground";
+
+type Mode = "light" | "dark";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const reduceMotion = useReducedMotion();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  // theme detection
+  const [mode, setMode] = useState<Mode | null>(null);
+
+  // sequence state
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showName, setShowName] = useState(false);
+  const [showDetected, setShowDetected] = useState(false);
+  const [bgVisible, setBgVisible] = useState(false);
+  const [bioVisible, setBioVisible] = useState(false);
+
+  // detect prefers-color-scheme
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const apply = () => setMode(mq.matches ? "dark" : "light");
+    apply();
+
+    const listener = (e: MediaQueryListEvent) =>
+      setMode(e.matches ? "dark" : "light");
+    mq.addEventListener("change", listener);
+    return () => mq.removeEventListener("change", listener);
+  }, []);
+
+  // Orchestrate sequence AFTER we know the mode
+  useEffect(() => {
+    if (!mode) return;
+
+    const base = reduceMotion ? 0 : 200; // tiny delay scaler if motion allowed
+    const timers: number[] = [];
+
+    // Step 1: welcome
+    timers.push(window.setTimeout(() => setShowWelcome(true), 100 + base));
+
+    // Step 2: name
+    timers.push(window.setTimeout(() => setShowName(true), 900 + base));
+
+    // Step 3: detected
+    timers.push(window.setTimeout(() => setShowDetected(true), 2000 + base));
+
+    // Step 4: fade out detected
+    timers.push(window.setTimeout(() => setShowDetected(false), 3000 + base));
+
+    // Step 5: reveal background
+    timers.push(window.setTimeout(() => setBgVisible(true), 3200 + base));
+
+    return () => timers.forEach(clearTimeout);
+  }, [mode, reduceMotion]);
+
+  useEffect(() => {
+    if (!bgVisible) return;
+    const t = setTimeout(() => setBioVisible(true), reduceMotion ? 0 : 250);
+    return () => clearTimeout(t);
+  }, [bgVisible, reduceMotion]);
+
+  // initial black backdrop until bgVisible
+  const containerStyle = useMemo<React.CSSProperties>(() => {
+    return { backgroundColor: "black" };
+  }, []);
+
+  // common timings
+  const fadeIn = { duration: 0.6, ease: "easeOut" as const };
+  const fadeOut = { duration: 0.4, ease: "easeIn" as const };
+
+  return (
+    <div
+      className="min-h-screen w-full text-white relative overflow-hidden"
+      style={containerStyle}
+    >
+      {/* Backgrounds, only once it's time */}
+      <AnimatePresence>
+        {bgVisible && mode === "light" && (
+          <motion.div
+            key="bg-day"
+            initial={reduceMotion ? {} : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={reduceMotion ? {} : fadeIn}
+            className="absolute inset-0"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <DaylightBackground />
+          </motion.div>
+        )}
+
+        {bgVisible && mode === "dark" && (
+          <motion.div
+            key="bg-night"
+            initial={reduceMotion ? {} : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={reduceMotion ? {} : fadeIn}
+            className="absolute inset-0"
           >
-            Read our docs
-          </a>
-        </div>
+            <StarryNightBackground />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* optional overlay for legibility once bg is visible */}
+      {bgVisible && (
+        <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+      )}
+
+      {/* Foreground copy + float-to-top hero */}
+      <main className="relative z-10 min-h-screen px-6">
+        {/* This spacer keeps the hero from overlapping the top content after it floats */}
+        <div className="h-[10vh] sm:h-[12vh] md:h-[14vh]" />
+
+        <motion.div
+          // The hero block starts centered, then floats up when bg is visible
+          initial={false}
+          animate={
+            bgVisible
+              ? reduceMotion
+                ? { y: 0 }
+                : { y: "-35vh", scale: 0.96 }
+              : { y: 0, scale: 1 }
+          }
+          transition={
+            reduceMotion
+              ? {}
+              : { type: "spring", stiffness: 120, damping: 20, mass: 0.8 }
+          }
+          className="flex flex-col items-center text-center"
+          style={{ willChange: "transform" }}
+        >
+          {/* line 1: welcome (always mounted, no layout shift) */}
+          <motion.p
+            initial={false}
+            animate={showWelcome ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+            transition={reduceMotion ? {} : { duration: 0.6, ease: "easeOut" }}
+            className="text-lg sm:text-xl md:text-2xl text-white/80"
+            aria-hidden={!showWelcome}
+          >
+            welcome to the profile of
+          </motion.p>
+
+          <div className="h-3" />
+
+          {/* line 2: name */}
+          <motion.h1
+            initial={false}
+            animate={showName ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+            transition={reduceMotion ? {} : { duration: 0.6, ease: "easeOut" }}
+            className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight"
+            aria-hidden={!showName}
+            style={{ willChange: "opacity, transform" }}
+          >
+            <span className="text-[#d95c23]">Benjamin Farthing</span>
+          </motion.h1>
+
+          <div className="h-4" />
+
+          {/* line 3: detected (fades out before background) */}
+          <motion.p
+            initial={false}
+            animate={
+              showDetected ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 }
+            }
+            transition={
+              reduceMotion ? {} : { duration: 0.4, ease: "easeInOut" }
+            }
+            className="text-base sm:text-lg md:text-xl bg-white/10 px-3 py-1.5 rounded"
+            aria-hidden={!showDetected}
+            style={{ willChange: "opacity, transform" }}
+          >
+            Screen detected — <strong>{mode}</strong>
+          </motion.p>
+        </motion.div>
+
+        {/* Reveal the Bio section underneath once bg is visible */}
+        <AnimatePresence>
+          {bioVisible && (
+            <motion.section
+              key="bio"
+              initial={reduceMotion ? {} : { opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={
+                reduceMotion ? {} : { duration: 0.5, ease: "easeOut" }
+              }
+              className="mx-auto max-w-3xl mt-[42vh] sm:mt-[44vh] md:mt-[46vh] text-left"
+            >
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4">Bio</h2>
+              <p className="text-white/90 leading-7">
+                I’m a backend-leaning full-stack developer in Atlanta with a
+                prior career in film sound. I build production-ready apps like
+                PrepMyWeek (meal planning), Appalachian Trail Weather (iOS), and
+                sensor-driven tools in Swift/React Native. I care about
+                performance, accessibility, and clean, maintainable code.
+              </p>
+            </motion.section>
+          )}
+        </AnimatePresence>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
