@@ -83,7 +83,7 @@ export function InfoPager({ title, pages, className }: Props) {
         </div>
 
         {/* Slide container fills remaining height */}
-        <div className="relative mt-4 flex-1 min-h-0">
+        <div className="relative mt-4 flex-1 min-h-40">
           <AnimatePresence custom={index} mode="popLayout">
             <motion.div
               key={index}

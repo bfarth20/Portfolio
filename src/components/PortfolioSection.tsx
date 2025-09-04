@@ -9,13 +9,73 @@ type Project = {
   summary?: string;
   video: { src: string; poster?: string; label?: string };
   pages?: PagerPage[]; // when present, we render InfoPager
+  links?: {
+    web?: string; // e.g. https://prepmyweek.com
+    ios?: string; // e.g. https://apps.apple.com/us/app/idXXXXXXXXX
+    android?: string; // e.g. https://play.google.com/store/apps/details?id=com.example
+    github?: string; // optional
+  };
 };
+
+function ProjectLinks({ links }: { links?: Project["links"] }) {
+  if (!links) return null;
+  const btn =
+    "rounded-full bg-white/12 hover:bg-white/20 px-3.5 py-2 text-sm font-medium ring-1 ring-white/15";
+  return (
+    <div className="mt-4 flex flex-wrap gap-2">
+      {links.web && (
+        <a
+          className={btn}
+          href={links.web}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Web Application"
+        >
+          Web Application
+        </a>
+      )}
+      {links.ios && (
+        <a
+          className={btn}
+          href={links.ios}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open on the iOS App Store"
+        >
+          iOS App Store
+        </a>
+      )}
+      {links.android && (
+        <a
+          className={btn}
+          href={links.android}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open on Google Play"
+        >
+          Google Play
+        </a>
+      )}
+      {links.github && (
+        <a
+          className={btn}
+          href={links.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open GitHub repository"
+        >
+          GitHub
+        </a>
+      )}
+    </div>
+  );
+}
 
 const prepMyWeekPages: PagerPage[] = [
   {
     heading: "Problem",
     bullets: [
-      "Most meal planners ignore a basic constraint: you want to shop at one store. Mixing recipes that require ingredients from multiple chains means extra trips or substitutions. I built PrepMyWeek as a store-first planner: pick your preferred chain, see only recipes whose ingredients are available there, then get an aisle-ordered grocery list.",
+      "Most meal planners ignore a basic constraint: you want to shop at one store. Mixing recipes that require ingredients from multiple chains means extra trips or substitutions. I built PrepMyWeek as a store-first planner: pick your preferred chain, see only recipes whose ingredients are available there, then get a section ordered grocery list.",
       "Many international grocery stores are fun to shop at, but without knowledge of certain ingredients and where to find them in store, many shoppers feel intimidated to do their full week's shopping in an unfamiliar store.",
     ],
   },
@@ -127,6 +187,13 @@ const projects: Project[] = [
     title: "PrepMyWeek",
     video: { src: "/media/projects/prepmyweek.mp4", label: "PrepMyWeek demo" },
     pages: prepMyWeekPages,
+    links: {
+      web: "https://prepmyweek.com",
+      ios: "https://apps.apple.com/us/app/prepmyweeklite/id6748859377", // ← replace with real ID
+      android:
+        "https://play.google.com/store/apps/details?id=com.benfarthing.prepmyweek&pcampaignid=web_share", // ← replace
+      github: "https://github.com/bfarth20/prepmyweek",
+    },
   },
   {
     title: "Appalachian Trail Weather",
@@ -135,11 +202,17 @@ const projects: Project[] = [
       label: "AT Weather walkthrough",
     },
     pages: atWeatherPages,
+    links: {
+      ios: "https://apps.apple.com/us/app/appalachian-trail-weather/id6751362485", // ← replace with real ID
+    },
   },
   {
     title: "GhostTDS",
     video: { src: "/media/projects/ghosttds.mp4", label: "GhostTDS preview" },
     pages: ghostTdsPages,
+    links: {
+      ios: "https://apps.apple.com/us/app/ghosttds/id6751655398", // ← replace with real ID
+    },
   },
 ];
 
@@ -151,7 +224,7 @@ export function PortfolioSection() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.25 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="mx-auto max-w-6xl pt-16 sm:pt-20"
+      className="mx-auto max-w-6xl pt-8 sm:pt-12"
     >
       <div className="mb-8">
         <h2 className="text-2xl sm:text-3xl font-bold">Portfolio</h2>
@@ -185,10 +258,14 @@ export function PortfolioSection() {
               <div
                 className={`flex flex-col ${
                   reverse ? "md:order-1" : "md:order-2"
-                }`}
+                } h-full`}
               >
                 {p.pages ? (
-                  <InfoPager title={p.title} pages={p.pages} />
+                  <InfoPager
+                    title={p.title}
+                    pages={p.pages}
+                    className="h-full"
+                  />
                 ) : (
                   <>
                     <h3 className="text-xl sm:text-2xl font-semibold">
@@ -197,6 +274,7 @@ export function PortfolioSection() {
                     <p className="mt-3 text-white/80 leading-7">{p.summary}</p>
                   </>
                 )}
+                <ProjectLinks links={p.links} />
               </div>
             </motion.article>
           );

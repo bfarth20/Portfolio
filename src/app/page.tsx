@@ -42,8 +42,8 @@ export default function Home() {
 
   const portfolioTriggerRef = useRef<HTMLDivElement>(null);
   const portfolioReady = useInView(portfolioTriggerRef, {
-    margin: "0px 0px -25% 0px", // reveal a bit before it fully enters
-    once: true, // only trigger once
+    margin: "0px 0px -10% 0px",
+    once: true,
   });
 
   // detect prefers-color-scheme
@@ -179,7 +179,7 @@ export default function Home() {
                 className="text-lg sm:text-xl md:text-2xl text-white/80"
                 aria-hidden={!showWelcome}
               >
-                welcome to the portfolio of
+                Welcome to the Portfolio of
               </motion.p>
 
               <div className="h-3" />
@@ -197,7 +197,7 @@ export default function Home() {
                 aria-hidden={!showName}
                 style={{ willChange: "opacity, transform" }}
               >
-                <span className="text-[#d95c23]">Benjamin Farthing</span>
+                <span>Benjamin Farthing</span>
               </motion.h1>
 
               <div className="h-4" />
@@ -266,25 +266,29 @@ export default function Home() {
                   className="text-white/90 leading-7"
                 >
                   <p>
-                    For 15 years I worked in the film industry, bringing
-                    creativity and collaboration to every project. Now I’m
-                    channeling that experience into software—crafting clean,
-                    thoughtful code and building tools that solve real problems.
+                    For 15 years I worked as a Boom Operator and Sound
+                    Technician in the film industry, bringing creativity and
+                    collaboration to every project. Now I’m channeling that
+                    experience into software: crafting clean, thoughtful code
+                    and building tools that solve real problems.
                   </p>
                   <p className="mt-4">
-                    I studied sound recording at Savannah College of Art and
-                    Design (Magna Cum Laude), then moved to Atlanta where I
-                    built a career on union sets. As the industry landscape
-                    shifted—longer hours, lower pay, fewer opportunities—I chose
-                    a new chapter that offers safer conditions, stability, and
-                    fresh technical challenges.
+                    I studied sound programming and design at Savannah College
+                    of Art and Design (Magna Cum Laude), then moved to Atlanta
+                    where I built a career on union sets. As the industry
+                    landscape shifted, longer hours, lower pay, fewer
+                    opportunities, I chose a new chapter that offers safer
+                    conditions, stability, and fresh technical challenges.
                   </p>
                   <p className="mt-4">
-                    I took the leap into a full-stack bootcamp, spent three
-                    intense months coding 10 hours a day, and finished at the
-                    top of my class. I shipped <em>PrepMyWeek</em>, a fully
-                    functional meal-planning app, now live and growing— proof
-                    that I can deliver thoughtful, scalable software end-to-end.
+                    In the beginning of 2025, I took the leap into a full stack
+                    bootcamp, spent three intense months coding 10 hours a day,
+                    and finished at the top of my class. I shipped{" "}
+                    <em>PrepMyWeek</em>, a fully functional meal planning app,
+                    now live and growing, proof that I can deliver thoughtful,
+                    scalable software end to end. Since that app was shipped I
+                    have continued pushing forward, delivering multiple apps for
+                    various needs.
                   </p>
                 </motion.div>
 
@@ -299,23 +303,38 @@ export default function Home() {
           )}
         </AnimatePresence>
 
+        {/* Spacer that keeps Bio on screen a bit */}
         <div
           ref={portfolioTriggerRef}
-          className="h-[28vh] sm:h-[32vh] md:h-[36vh]"
+          className="h-[12vh] sm:h-[14vh] md:h-[16vh]"
         />
 
-        {/* PORTFOLIO SECTION */}
-        <PortfolioSection />
-        <SkillsSection />
-        <EducationSection />
-        <ResumeCta
-          resumePath="/resume/Benjamin-Farthing-Resume.pdf"
-          email="benjamin.farthing@gmail.com"
-          linkedin="www.linkedin.com/in/benjamin-farthing-397a3064"
-        />
+        {/* Portfolio + following sections reveal when spacer enters view */}
+        <AnimatePresence>
+          {portfolioReady && (
+            <motion.div
+              key="portfolio-block"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <PortfolioSection />
+              <SkillsSection />
+              <EducationSection />
+              <ResumeCta
+                resumePath="/resume/Benjamin-Farthing-Resume.pdf"
+                email="benjamin.farthing@gmail.com"
+                linkedin="https://www.linkedin.com/in/benjamin-farthing-397a3064"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Keep the timed modal outside the gate so it can still appear */}
         <ReachOutModal
-          delayMs={40000}
-          email="benjamin@yourdomain.com"
+          delayMs={20000}
+          email="benjamin.farthing@gmail.com"
           suppressDays={0}
         />
       </main>

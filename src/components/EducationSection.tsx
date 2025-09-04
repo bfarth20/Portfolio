@@ -3,24 +3,24 @@
 import { motion } from "framer-motion";
 
 type Edu = {
-  school: string,
-  credential: string,
-  meta?: string,
-  years?: string,
+  school: string;
+  credential: string;
+  meta?: string;
+  years?: string;
 };
 
 const education: Edu[] = [
   {
-    school: "Savannah College of Art and Design",
-    credential: "BFA, Sound Design — Magna Cum Laude",
-    years: "—",
-    meta: "Focused on audio engineering, on-set workflow, and post-production.",
+    school: "Emory University",
+    credential: "Full-Stack Web Development Bootcamp Certificate, Top of Class",
+    years: "2025",
+    meta: "Three-month intensive bootcamp that took us from semantic HTML/CSS fundamentals through React frameworks (Next.js) and TypeScript, into Node/Express backends with REST patterns and SQL data modeling using PostgreSQL/Prisma—culminating in authenticated, deployed apps.",
   },
   {
-    school: "Full-Stack Web Development Bootcamp",
-    credential: "Certificate, Top of Class",
-    years: "—",
-    meta: "Three months, ~10 hrs/day — JS/TS, React/Next.js, Node/Express, SQL/Prisma.",
+    school: "Savannah College of Art and Design",
+    credential: "BFA, Sound Programming and Design — Magna Cum Laude",
+    years: "2008-2012",
+    meta: "Coursework spanned web design, DAW workflows, and signal flow, with a curriculum focused on applying computer technology to production and post-production sound.",
   },
 ];
 
