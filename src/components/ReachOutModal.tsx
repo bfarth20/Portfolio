@@ -12,7 +12,7 @@ type Props = {
 
 export function ReachOutModal({
   delayMs = 12000,
-  email = "benjamin@example.com",
+  email = "benjamin.farthing@gmail.com",
   storageKey = "reachout_dismissed_at",
   suppressDays = 30,
 }: Props) {

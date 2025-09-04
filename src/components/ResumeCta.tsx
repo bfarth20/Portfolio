@@ -9,9 +9,9 @@ type Props = {
 };
 
 export function ResumeCta({
-  resumePath = "/resume/Benjamin-Farthing-Resume.pdf",
-  email = "benjamin@example.com",
-  linkedin = "https://www.linkedin.com/",
+  resumePath = "/resume/FarthingResume2025.pdf",
+  email = "benjamin.farthing@gmail.com",
+  linkedin = "www.linkedin.com/in/benjamin-farthing-397a3064",
 }: Props) {
   const copyEmail = async () => {
     try {
