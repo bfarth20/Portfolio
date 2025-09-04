@@ -41,10 +41,6 @@ export default function Home() {
   });
 
   const portfolioTriggerRef = useRef<HTMLDivElement>(null);
-  const portfolioReady = useInView(portfolioTriggerRef, {
-    margin: "0px 0px -10% 0px",
-    once: true,
-  });
 
   // detect prefers-color-scheme
   useEffect(() => {
@@ -309,26 +305,25 @@ export default function Home() {
         />
 
         {/* Portfolio + following sections reveal when spacer enters view */}
-        <AnimatePresence>
-          {portfolioReady && (
-            <motion.div
-              key="portfolio-block"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-              <PortfolioSection />
-              <SkillsSection />
-              <EducationSection />
-              <ResumeCta
-                resumePath="/resume/Benjamin-Farthing-Resume.pdf"
-                email="benjamin.farthing@gmail.com"
-                linkedin="https://www.linkedin.com/in/benjamin-farthing-397a3064"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+
+        <motion.section
+          id="portfolio"
+          initial={false}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1, margin: "0px 0px -10% 0px" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="opacity-0 translate-y-4"
+        >
+          <PortfolioSection />
+
+          <SkillsSection />
+          <EducationSection />
+          <ResumeCta
+            resumePath="/resume/Benjamin-Farthing-Resume.pdf"
+            email="benjamin.farthing@gmail.com"
+            linkedin="https://www.linkedin.com/in/benjamin-farthing-397a3064"
+          />
+        </motion.section>
 
         {/* Keep the timed modal outside the gate so it can still appear */}
         <ReachOutModal
