@@ -6,7 +6,6 @@ import {
   AnimatePresence,
   useReducedMotion,
   useScroll,
-  useInView,
   useMotionValueEvent,
 } from "framer-motion";
 import { DaylightBackground } from "@/components/DaylightBackground";
@@ -306,16 +305,8 @@ export default function Home() {
 
         {/* Portfolio + following sections reveal when spacer enters view */}
 
-        <motion.section
-          id="portfolio"
-          initial={false}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1, margin: "0px 0px -10% 0px" }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="opacity-0 translate-y-4"
-        >
+        <section id="portfolio" className="mx-auto max-w-6xl pt-8 sm:pt-12">
           <PortfolioSection />
-
           <SkillsSection />
           <EducationSection />
           <ResumeCta
@@ -323,7 +314,7 @@ export default function Home() {
             email="benjamin.farthing@gmail.com"
             linkedin="https://www.linkedin.com/in/benjamin-farthing-397a3064"
           />
-        </motion.section>
+        </section>
 
         {/* Keep the timed modal outside the gate so it can still appear */}
         <ReachOutModal

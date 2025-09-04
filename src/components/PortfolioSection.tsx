@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { FilmReel } from "@/components/FilmReel";
 import { InfoPager, PagerPage } from "@/components/InfoPager";
 
@@ -189,9 +188,9 @@ const projects: Project[] = [
     pages: prepMyWeekPages,
     links: {
       web: "https://prepmyweek.com",
-      ios: "https://apps.apple.com/us/app/prepmyweeklite/id6748859377", // ← replace with real ID
+      ios: "https://apps.apple.com/us/app/prepmyweeklite/id6748859377",
       android:
-        "https://play.google.com/store/apps/details?id=com.benfarthing.prepmyweek&pcampaignid=web_share", // ← replace
+        "https://play.google.com/store/apps/details?id=com.benfarthing.prepmyweek&pcampaignid=web_share",
       github: "https://github.com/bfarth20/prepmyweek",
     },
   },
@@ -203,7 +202,7 @@ const projects: Project[] = [
     },
     pages: atWeatherPages,
     links: {
-      ios: "https://apps.apple.com/us/app/appalachian-trail-weather/id6751362485", // ← replace with real ID
+      ios: "https://apps.apple.com/us/app/appalachian-trail-weather/id6751362485",
     },
   },
   {
@@ -211,23 +210,19 @@ const projects: Project[] = [
     video: { src: "/media/projects/ghosttds.mp4", label: "GhostTDS preview" },
     pages: ghostTdsPages,
     links: {
-      ios: "https://apps.apple.com/us/app/ghosttds/id6751655398", // ← replace with real ID
+      ios: "https://apps.apple.com/us/app/ghosttds/id6751655398",
     },
   },
 ];
 
 export function PortfolioSection() {
   return (
-    <motion.section
+    <section
       id="portfolio"
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="mx-auto max-w-6xl pt-8 sm:pt-12"
+      className="mx-auto max-w-6xl pt-8 sm:pt-12 !opacity-100"
     >
       <div className="mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold">Portfolio</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white">Portfolio</h2>
         <p className="mt-2 text-white/80">
           Here are some featured projects showcasing various coding skills.
         </p>
@@ -237,15 +232,10 @@ export function PortfolioSection() {
         {projects.map((p, idx) => {
           const reverse = idx % 2 === 1;
           return (
-            <motion.article
+            <article
               key={p.title}
-              initial={{ opacity: 0, y: 8 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.45, ease: "easeOut" }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 backdrop-blur-sm md:items-stretch items-start"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 backdrop-blur-sm md:items-stretch items-start !opacity-100"
             >
-              {/* Video (portrait) */}
               <FilmReel
                 src={p.video.src}
                 poster={p.video.poster}
@@ -254,7 +244,6 @@ export function PortfolioSection() {
                 className={`w-full ${reverse ? "md:order-2" : "md:order-1"}`}
               />
 
-              {/* Text / Pager */}
               <div
                 className={`flex flex-col ${
                   reverse ? "md:order-1" : "md:order-2"
@@ -276,10 +265,10 @@ export function PortfolioSection() {
                 )}
                 <ProjectLinks links={p.links} />
               </div>
-            </motion.article>
+            </article>
           );
         })}
       </div>
-    </motion.section>
+    </section>
   );
 }
