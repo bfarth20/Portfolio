@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 export type PagerPage = {
@@ -18,14 +18,17 @@ export function InfoPager({ title, pages, className }: Props) {
   const [index, setIndex] = useState(0);
   const reduceMotion = useReducedMotion();
 
-  const go = (dir: -1 | 1) => {
-    setIndex((i) => {
-      const next = i + dir;
-      if (next < 0) return 0;
-      if (next >= pages.length) return pages.length - 1;
-      return next;
-    });
-  };
+  const go = useCallback(
+    (dir: -1 | 1) => {
+      setIndex((i) => {
+        const next = i + dir;
+        if (next < 0) return 0;
+        if (next >= pages.length) return pages.length - 1;
+        return next;
+      });
+    },
+    [pages.length]
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -34,7 +37,7 @@ export function InfoPager({ title, pages, className }: Props) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [go]);
 
   const variants = {
     enter: (dir: number) =>

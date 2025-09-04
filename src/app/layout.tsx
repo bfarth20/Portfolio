@@ -1,5 +1,5 @@
 // app/layout.tsx
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
@@ -48,15 +48,17 @@ export const metadata: Metadata = {
     title: "Benjamin Farthing — Full-Stack Developer",
     description:
       "Backend-leaning full-stack developer in Atlanta. See projects, stack, and app demos.",
+    images: ["/opengraph-image.png"],
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0b0b0b" },
   ],
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-  },
 };
 
 export default function RootLayout({
@@ -82,7 +84,7 @@ export default function RootLayout({
               description: "Full-stack developer building web and mobile apps.",
               url: "https://YOUR-SITE.vercel.app",
               sameAs: [
-                "www.linkedin.com/in/benjamin-farthing-397a3064",
+                "https://www.linkedin.com/in/benjamin-farthing-397a3064",
                 "https://github.com/bfarth20",
               ],
             }),

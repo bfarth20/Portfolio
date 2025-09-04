@@ -98,7 +98,6 @@ export default function Home() {
 
   // common timings
   const fadeIn = { duration: 0.6, ease: "easeOut" as const };
-  const fadeOut = { duration: 0.4, ease: "easeIn" as const };
 
   return (
     <div
