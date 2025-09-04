@@ -310,7 +310,7 @@ export default function Home() {
           <SkillsSection />
           <EducationSection />
           <ResumeCta
-            resumePath="/resume/Benjamin-Farthing-Resume.pdf"
+            resumePath="/resume/FarthingResume2025.pdf"
             email="benjamin.farthing@gmail.com"
             linkedin="https://www.linkedin.com/in/benjamin-farthing-397a3064"
           />
