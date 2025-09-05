@@ -4,13 +4,24 @@ import { useEffect, useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 
 type Props = {
-  src: string; // e.g. "/media/projects/prepmyweek.mp4"
-  poster?: string; // e.g. "/media/projects/prepmyweek.jpg"
+  src: string;
+  poster?: string;
   caption?: string;
-  className?: string; // wrapper <figure> classes
-  orientation?: "portrait" | "landscape"; // NEW
-  maxPortraitWidthClassName?: string; // optional override
+  className?: string;
+  orientation?: "portrait" | "landscape";
+  maxPortraitWidthClassName?: string;
 };
+
+type NetworkInformation = {
+  saveData?: boolean;
+  effectiveType?: string; // "slow-2g" | "2g" | "3g" | "4g"
+};
+
+function getNetworkInfo(): NetworkInformation | undefined {
+  if (typeof navigator === "undefined") return undefined;
+  const anyNav = navigator as Navigator & { connection?: NetworkInformation };
+  return anyNav.connection;
+}
 
 export function FilmReel({
   src,
@@ -18,19 +29,54 @@ export function FilmReel({
   caption,
   className,
   orientation = "landscape",
-  maxPortraitWidthClassName = "max-w-[360px]", // tweak to taste
+  maxPortraitWidthClassName = "max-w-[360px]",
 }: Props) {
   const ref = useRef<HTMLVideoElement>(null);
   const reduceMotion = useReducedMotion();
-  const inView = useInView(ref, { margin: "0px 0px -25% 0px" });
+
+  // Attach a little earlier so it’s primed by the time it appears
+  const inView = useInView(ref, { margin: "200px 0px 0px 0px" });
+
+  // Idle warm-up fetch (helps if rel=preload is ignored on some iOS builds)
+  useEffect(() => {
+    // Respect Data Saver
+    const info = getNetworkInfo();
+    const saveData = !!info?.saveData;
+    const slow =
+      info?.effectiveType === "slow-2g" || info?.effectiveType === "2g";
+    if (saveData || slow) return; // skip warmup
+
+    const ric =
+      window.requestIdleCallback ??
+      ((cb: IdleRequestCallback) =>
+        window.setTimeout(
+          () => cb({ didTimeout: false, timeRemaining: () => 0 }),
+          200
+        ));
+
+    const cancel =
+      window.cancelIdleCallback ?? ((id: number) => clearTimeout(id));
+
+    const id = ric(async () => {
+      try {
+        await fetch(src, { cache: "force-cache", mode: "no-cors" });
+        if (poster)
+          await fetch(poster, { cache: "force-cache", mode: "no-cors" });
+      } catch {
+        // ignore
+      }
+    });
+    return () => cancel(id);
+  }, [src, poster]);
 
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
 
-    // lazy set src the first time we need it
+    // Attach src the first time it comes near view
     if (inView && !v.src) {
       v.src = src;
+      // keep it light: first get metadata; browser should hit warm cache
       v.load();
     }
 
@@ -47,7 +93,6 @@ export function FilmReel({
     return () => v.pause();
   }, [inView, reduceMotion, src]);
 
-  // Aspect ratio handling
   const aspect = orientation === "portrait" ? "9 / 16" : "16 / 9";
   const widthClass =
     orientation === "portrait"
@@ -72,8 +117,7 @@ export function FilmReel({
           muted
           loop
           playsInline
-          preload="metadata"
-          controls
+          preload="metadata" // light until src is attached
           className="absolute inset-0 h-full w-full rounded-xl shadow-xl object-cover bg-black/50"
           aria-label={caption ?? "Project demo video"}
         />

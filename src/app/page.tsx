@@ -16,6 +16,7 @@ import { EducationSection } from "@/components/EducationSection";
 import { SkillsSection } from "@/components/SkillsSection";
 import { ReachOutModal } from "@/components/ReachOutModal";
 import { ResumeCta } from "@/components/ResumeCta";
+import MediaPreload from "@/components/MediaPreload";
 
 type Mode = "light" | "dark";
 
@@ -99,6 +100,7 @@ export default function Home() {
       className="min-h-screen w-full text-white relative overflow-hidden"
       style={containerStyle}
     >
+      <MediaPreload />
       {/* Backgrounds, only once it's time */}
       <AnimatePresence>
         {bgVisible && mode === "light" && (
