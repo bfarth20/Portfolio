@@ -10,12 +10,10 @@ type Props = {
   className?: string;
   orientation?: "portrait" | "landscape";
   maxPortraitWidthClassName?: string;
+  crossOrigin?: "anonymous" | "use-credentials"; // only if serving from another domain
 };
 
-type NetworkInformation = {
-  saveData?: boolean;
-  effectiveType?: string; // "slow-2g" | "2g" | "3g" | "4g"
-};
+type NetworkInformation = { saveData?: boolean; effectiveType?: string };
 
 function getNetworkInfo(): NetworkInformation | undefined {
   if (typeof navigator === "undefined") return undefined;
@@ -30,21 +28,19 @@ export function FilmReel({
   className,
   orientation = "landscape",
   maxPortraitWidthClassName = "max-w-[360px]",
+  crossOrigin,
 }: Props) {
   const ref = useRef<HTMLVideoElement>(null);
   const reduceMotion = useReducedMotion();
+  const inView = useInView(ref, { margin: "1000px 0px 0px 0px" });
 
-  // Attach a little earlier so it’s primed by the time it appears
-  const inView = useInView(ref, { margin: "200px 0px 0px 0px" });
-
-  // Idle warm-up fetch (helps if rel=preload is ignored on some iOS builds)
+  // Idle warm-up fetch (helps when <link rel="preload"> is ignored)
   useEffect(() => {
-    // Respect Data Saver
     const info = getNetworkInfo();
     const saveData = !!info?.saveData;
     const slow =
       info?.effectiveType === "slow-2g" || info?.effectiveType === "2g";
-    if (saveData || slow) return; // skip warmup
+    if (saveData || slow) return;
 
     const ric =
       window.requestIdleCallback ??
@@ -53,31 +49,45 @@ export function FilmReel({
           () => cb({ didTimeout: false, timeRemaining: () => 0 }),
           200
         ));
-
     const cancel =
       window.cancelIdleCallback ?? ((id: number) => clearTimeout(id));
 
     const id = ric(async () => {
       try {
-        await fetch(src, { cache: "force-cache", mode: "no-cors" });
-        if (poster)
-          await fetch(poster, { cache: "force-cache", mode: "no-cors" });
+        await fetch(src, { cache: "force-cache" });
+        if (poster) await fetch(poster, { cache: "force-cache" });
       } catch {
-        // ignore
+        /* ignore */
       }
     });
     return () => cancel(id);
   }, [src, poster]);
 
+  // Pause when tab goes background (battery-friendly)
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
+    const onVis = () => {
+      if (document.hidden) v.pause();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
 
-    // Attach src the first time it comes near view
-    if (inView && !v.src) {
-      v.src = src;
-      // keep it light: first get metadata; browser should hit warm cache
-      v.load();
+  useEffect(() => {
+    const v = ref.current;
+    if (!v || reduceMotion) return;
+
+    if (inView) {
+      const absolute = new URL(
+        src,
+        typeof window !== "undefined" ? window.location.origin : "https://local"
+      ).toString();
+      if (v.src !== absolute) {
+        v.src = src;
+        v.setAttribute("preload", "auto");
+        v.load();
+      }
     }
 
     const playIfPossible = async () => {
@@ -85,7 +95,7 @@ export function FilmReel({
         if (inView && !reduceMotion) await v.play();
         else v.pause();
       } catch {
-        /* autoplay can be blocked; ignore */
+        /* autoplay may be blocked */
       }
     };
 
@@ -117,7 +127,11 @@ export function FilmReel({
           muted
           loop
           playsInline
-          preload="metadata" // light until src is attached
+          preload="metadata"
+          {...(crossOrigin ? { crossOrigin } : {})}
+          controls={false}
+          controlsList="nodownload noplaybackrate noremoteplayback"
+          disablePictureInPicture
           className="absolute inset-0 h-full w-full rounded-xl shadow-xl object-cover bg-black/50"
           aria-label={caption ?? "Project demo video"}
         />
