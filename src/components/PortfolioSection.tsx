@@ -181,6 +181,41 @@ const ghostTdsPages: PagerPage[] = [
   },
 ];
 
+const maPortfolioPages: PagerPage[] = [
+  {
+    heading: "Problem",
+    bullets: [
+      "Build a custom portfolio that the client can update without recurring CMS fees or calling a developer.",
+      "Use a familiar tool (Notion) as the content source for text, images, and simple metadata.",
+      "Handle portrait-heavy artwork: avoid whitespace on desktop while keeping mobile layouts pretty.",
+      "Add basic curation features (role filter, featured slideshow) driven by Notion fields.",
+      "Keep the stack fast to ship and cheap to run: Next.js + Vercel with a custom domain (monica-alexander.com).",
+    ],
+  },
+  {
+    heading: "Headless CMS implementation",
+    bullets: [
+      "Hooked the site to Notion as the single source of truth: **Site KV**, **Works**, and **Assets** databases.",
+      "Site KV powers page copy & settings (e.g., `about_bio`, `contact_message`, social links) with `whitespace-pre-wrap` for clean line breaks.",
+      "Works DB drives the portfolio grid & featured slideshow: title/slug/year, **Role (select)**, **Featured** flag, thumbnail + image gallery.",
+      "Assets DB resolves named media via a helper (`getAssetUrl(name)`), e.g., `headshot`, `headshot_clients`, `headshot_charity`.",
+      "Server components fetch via Notion Data Sources API; pages use **ISR (`revalidate = 600`)** so Notion edits publish automatically ~10 min later—no CMS fees.",
+      "Type-safe mapping with graceful fallbacks; `next/image` optimizes remote Notion/S3 URLs (hosts whitelisted in `next.config`).",
+      "URL-driven role filter (`?role=Illustration`) enables easy curation while keeping all content edits inside Notion.",
+    ],
+  },
+  {
+    heading: "Reusable components & filters",
+    bullets: [
+      "FeaturedSlideshow: drop-in hero that uses mobile contain / desktop cover, pauses on hover/hidden tab, load-gated auto-advance, optional per-slide `objectPosition`, and typed props for `intervalMs`, `optimize`, and aspect classes.",
+      "ArtworkCard: lightweight, reusable image card (`src`, `fullSrc`, `title`, `alt`) using `next/image` for optimization; clean rounded styling and hover affordances, ready to slot into any grid.",
+      "RoleFilter: single-select chip bar powered by Notion’s `Role` (select); syncs with URL via `?role=...`, uses accessible `aria-pressed`, and works behind a page-level `<Suspense>`.",
+      "Portfolio grid: responsive 2-column on mobile, 3-column on tablet/desktop; filters apply client-side from the URL—no extra requests or page reloads.",
+      "Composability: all pieces are prop-driven and type-safe, so future portfolio sites can reuse them by swapping only the data mapper from Notion.",
+    ],
+  },
+];
+
 const projects: Project[] = [
   {
     title: "PrepMyWeek",
@@ -211,6 +246,18 @@ const projects: Project[] = [
     pages: ghostTdsPages,
     links: {
       ios: "https://apps.apple.com/us/app/ghosttds/id6751655398",
+    },
+  },
+  {
+    title: "Artist Portfolio Headless CMS",
+    pages: maPortfolioPages,
+    video: {
+      src: "/media/projects/maportfolio.mov",
+      label: "Monica Alexander site walkthrough",
+    },
+    links: {
+      web: "https://monica-alexander.com",
+      github: "https://github.com/bfarth20/malexanderportfolio",
     },
   },
 ];
