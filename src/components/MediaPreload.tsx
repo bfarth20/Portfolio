@@ -5,6 +5,7 @@ const videos = [
   "/media/projects/prepmyweek.mp4",
   "/media/projects/atweather.mp4",
   "/media/projects/ghosttds.mp4",
+  "/media/projects/maportfolio.mov",
 ];
 
 export default function MediaPreload() {
